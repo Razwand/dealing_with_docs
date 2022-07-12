@@ -61,4 +61,4 @@ doc1 = Doc('./data/','first')
 backgrounddf = doc1.build_input()
 backgrounddf['Colour'] = backgrounddf['Pages'].apply(lambda x: Page('./data/', x).extract_background_color() )
 
-print(backgrounddf)
+#print(backgrounddf)
