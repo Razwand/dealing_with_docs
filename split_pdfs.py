@@ -12,7 +12,7 @@ import sys
 # In[2]:
 
 
-poppler_path = 'C:/Users\/asr_l/miniconda3/pkgs/poppler-22.04.0-h24fffdf_1/Library/bin'
+poppler_path = 'C:/Users/asr_l/miniconda3/pkgs/poppler-22.04.0-h24fffdf_1/Library/bin'
 
 
 # In[3]:
