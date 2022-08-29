@@ -263,6 +263,7 @@ def detect_shield(img):
     per_new_w_text = 0.3
     area_limit_sup = 40000
     
+    
     return(extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per_new_h_text,per_new_w_text, area_limit_sup))
 
 # Separación en PDFS
