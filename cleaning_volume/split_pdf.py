@@ -8,6 +8,7 @@ import os
 poppler_path = 'C:/Users/asr_l/miniconda3/envs/dealing_with_docs/Lib/site-packages/poppler-0.68.0/bin'
 
 def create_folder(name):
+
     '''
     Crea una carpeta con el nombre <name> si no existe ya
     '''
