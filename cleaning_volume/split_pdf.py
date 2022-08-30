@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+from pdf2image import convert_from_path
+import os
+# [!] PATH A MODIFICAR SEGÚN INSTALACIÓN DE POPPLER
+poppler_path = './libs/poppler-0.68.0/bin'
 
 def create_folder(name):
 

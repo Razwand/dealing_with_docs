@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from pdf2image import convert_from_path
-import os
-# [!] PATH A MODIFICAR SEGÚN INSTALACIÓN DE POPPLER
-poppler_path = 'C:/Users/asr_l/miniconda3/envs/dealing_with_docs/Lib/site-packages/poppler-0.68.0/bin'
-from split_pdf import create_folder, pdf_to_image
+
+from split_pdf import *
 
 from os import listdir
 from os.path import join, isfile
 import sys
+
 import time
 
 import pandas as pd
@@ -27,7 +25,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 # [!] TESSERACT_PATH
-pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
 ##############################################
 #  GENERAL TOOLS                             #
