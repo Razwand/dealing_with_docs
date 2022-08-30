@@ -2,10 +2,10 @@
 
 This repo contains 3 tools for large pdf documents treatment:
 
-- 🧹[Cleaning Volumes](## Cleaning Volumes)
+- 🧹[Cleaning Volumes](#cleaning-volumes)
 
 - ✂️ 📚 Split Volumes
 
 - ✂️ 📃📃📃Split Subdocuments
 
-## Cleaning Volumes
+###  Cleaning Volumes
