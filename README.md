@@ -11,11 +11,41 @@ This repo contains 3 tools for large pdf documents treatment:
 ###  Cleaning Volumes
 
 
+This tool can be used to filter a pdf volume with several pages to obtain a reduced version of
+the original pdf file.
+
+#### Context
+
+- Empty pages
+- Faxes
+- Pages with a certain Shield
+
+#### Dependencies
+
+
+#### Usage
 
 
 
 ###  Split Volumes
 
+#### Context
+
+#### Dependencies
+
+
+#### Usage
+
 
 
 ###  Split Subdocuments
+
+#### Context
+
+
+
+#### Dependencies
+
+
+#### Usage
+
