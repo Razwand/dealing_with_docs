@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from pdf2image import convert_from_path
+import os
+# [!] PATH A MODIFICAR SEGÚN INSTALACIÓN DE POPPLER
+poppler_path = 'C:/Users/asr_l/miniconda3/envs/dealing_with_docs/Lib/site-packages/poppler-0.68.0/bin'
+from split_pdf import create_folder, pdf_to_image
+
 from os import listdir
 from os.path import join, isfile
 import sys
@@ -16,14 +22,12 @@ import cv2
 import imutils
 
 from fpdf import FPDF
-from split_pdf import *
 import pytesseract
 import warnings
 warnings.simplefilter("ignore")
 
 # [!] TESSERACT_PATH
 pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
-
 
 ##############################################
 #  GENERAL TOOLS                             #
@@ -188,7 +192,7 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per
 
     # Filtering images that are not A4
     # imshape[1] = width, imshape[0] = height
-    keepPage = img.shape[1]>lim_inf_siz_pag and img.shape[1]<lim_sup_siz_pag 
+    keep_page = img.shape[1]>lim_inf_siz_pag and img.shape[1]<lim_sup_siz_pag 
     
     # Reducing image to left sup corner
     new_h = int(np.round(img.shape[0]*per_new_h)) 
@@ -209,14 +213,14 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per
 
     # Components
     connectivity = 4 
-    numLabels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary,connectivity , cv2.CV_32S)
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary,connectivity , cv2.CV_32S)
 
     # Width, height of the original image (left sup corner)
     max_alto = binary.shape[0]
 
-    if keepPage == True:
+    if keep_page == True:
         # For each one of the components... 
-        for i in range(1, numLabels):
+        for i in range(1, num_labels):
 
             # Height, Width and Area
             w = stats[i, cv2.CC_STAT_WIDTH]
@@ -224,13 +228,13 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per
             area = stats[i, cv2.CC_STAT_AREA]
 
             # Filtering Components
-            keepWidth = w > 80  
-            keepHeight = h > 90 and h < max_alto 
-            keepArea = area < area_limit_sup  
-            keepSquared = h-w < 100  
-            keepNotBanners = h>=w 
+            keep_width = w > 80  
+            keep_height = h > 90 and h < max_alto 
+            keep_area = area < area_limit_sup  
+            keep_squared = h-w < 100  
+            keep_not_banners = h>=w 
 
-            if keepWidth and keepHeight and keepNotBanners and keepArea and keepSquared:
+            if keep_width and keep_height and keep_not_banners and keep_area and keep_squared:
                 # Text extraction if image pass the filter
                 text_img = take_text(im_text)
                 admin = check_key_words(text_img,'spain')
@@ -350,20 +354,21 @@ def check_args(argv):
     if len(argv) == 3 and argv[2] in ['PDF', 'IMG']:
         if argv[2] == 'PDF':
             create_folder('input_pages')
-            if os.path.isdir('input_volume') and len(os.listdir('./input_volume/') ) != 0 and len(os.listdir('./input_volume/'+ argv[1]) ) != 0:
-                print('\U0001F642 Correct Input Path: {}'.format('./input_volume/' + argv[1] + '/'))
+            main_folder = './input_volume/'
+            if os.path.isdir('input_volume') and len(os.listdir(main_folder) ) != 0 and len(os.listdir(main_folder+ argv[1]) ) != 0:
+                print('\U0001F642 Correct Input Path: {}'.format(main_folder + argv[1] + '/'))
                 return(True)
             else:
                 print('Please, include the pdf folder inside the directory /input_volume')
                 return(False)
         elif argv[2] == 'IMG':
-            if os.path.isdir('input_pages') and len(os.listdir('./input_pages/') ) != 0 and len(os.listdir('./input_pages/'+ 'pdf_pages_' + argv[1]) ) != 0:
-                print('Correct Input Path: {}'.format('./input_pages/' + argv[1] + '/'))
+            pages_folder = './input_pages/'
+            if os.path.isdir('input_pages') and len(os.listdir(pages_folder) ) != 0 and len(os.listdir(pages_folder+ 'pdf_pages_' + argv[1]) ) != 0:
+                print('Correct Input Path: {}'.format(pages_folder + argv[1] + '/'))
                 return(True)
             else:
                 print('Please, include the pages folder inside the directory /input_pages')
                 return(False)
-
     else:
          print('\U0001F4A5 Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
 
