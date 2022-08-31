@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
 from split_pdf import *
 
 from os import listdir
@@ -24,23 +23,20 @@ import pytesseract
 import warnings
 warnings.simplefilter("ignore")
 
-# [!] TESSERACT_PATH
-pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
 ##############################################
 #  GENERAL TOOLS                             #
 ##############################################
 
-def build_path(sample, type_path):
+def build_strings(sample, type_string):
     '''
-    This function generates a  string with the path given.
-    INPUT
+    This function generates a  string needed (input path/output file).
     - sample: string that contains the volume directory name 
-    - type_path: input/output, depending on the directory/file we are pointing at
+    - type_string: input/output, depending on the directory/file we are pointing at
     '''
-    if type_path == 'input':
+    if type_string == 'input':
         return('./input_pages/pdf_pages_' + sample + '/')
-    elif type_path == 'output':
+    elif type_string == 'output':
         return('./output/Final_Result_'+sample+'.csv')
 
 def build_df_total(path):
@@ -61,13 +57,29 @@ def build_df_total(path):
     
     df = pd.DataFrame()
     df['Page_Volume'] = set_of_pages
-    all_pages_num = [x.split('.')[-2] for x in set_of_pages]
-    all_pages_num = [x.split('_')[-1] for x in all_pages_num]
+    all_pages_num = [x.split('.')[-2].split('_')[-1] for x in set_of_pages]
     
     df['Page_Volume'] = set_of_pages
     df['Page_Num'] = all_pages_num
     
     return(df)
+
+def build_df(list_pages,sample,name_doc):
+
+    '''
+    This function selects the filtered pages and return a volume version with only this pages and 
+    save it in the output folder.
+
+    The name of the file will be:
+     <sample>_filtered.pdf
+    '''
+    
+    path = './input_pages/pdf_pages_'+sample +'/'
+    pdf = FPDF()
+    for element in list_pages:
+        pdf.add_page()
+        pdf.image(path + element,0,10,210,297)
+    pdf.output('./output/'+ sample + '_' + name_doc + ".pdf", "F")
 
 ##############################################
 #  FEATURES                                  #
@@ -91,102 +103,41 @@ def take_contours_empty(img):
     
     return(contours)
 
-def extract_empty_pages(img):
+def extract_empty_pages(img,contour_limit):
 
     '''
     Having an image (<img>) corresponding to a single page, if the contours detected are less than 100
     the page is considered to be empty (value 1 will be returned). Else, it is considered to be not-empty (value 0 will be returned).
 
     '''
-    
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     cnts = take_contours_empty(img)
     
-    if len(cnts)<100: 
+    if len(cnts)<contour_limit: 
         return(1)
     else:
         return(0)
 
-# Detecting Adminitration shields
-def take_text(img):
+def detect_empty_pages(img):
 
     '''
-    From a given image, this function returns tesseract detected text.
-    '''
-    return(pytesseract.image_to_string(img))
-
-def text_proces(t):
-
-    '''
-    Text processing that deletes some characters and finds uppercase text.
-    '''
-    t = t.replace('\n',' ')
-    m = re.findall('[A-Z]+',t)
-    return(' '.join(m))
-
-def text_proces_low(t):
-
-    '''
-    Text processing that deletes some characters and finds uppercase/lowecase text
-    not considering other special characters.
+    Function that initialize parameters that will be used when detecting the shield
     '''
 
-    t = t.replace('\n',' ')
-    m = re.findall('[a-z]+|[A-Z]+',t)
-    return(' '.join(m))
-        
-def check_key_words(text, type_search):
+    contour_limit = 100
+
+    return(extract_empty_pages(img,contour_limit))
+
+# Shields Detector
+
+def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w, area_limit_sup):
 
     '''
-    This function search for some key words within the text extracted. Depending on the type of search to be
-    performed different comparations are made:
-
-    type_search: 
-    - <spain>: looking for closeness to  "ADMINISTRACION DE JUSTICIA"
-    - <fax>: looking for closeness to "FAX"
-    '''
-                    
-    if type_search == 'spain':
-        if  lev(text_proces(str(text)),'ADMINISTRACION DE JUSTICIA')<10 or re.findall('ADMINISTRACION',text_proces(str(text))) != [] or re.findall('ADMI+',text_proces(str(text))) != [] or re.findall('JUSTICIA',text_proces(str(text))) != []:
-            return(1)
-        else:
-            return(0)
-    
-    elif type_search == 'fax':    
-        if re.findall('FAX',str(text)) != [] or re.findall('transmision',text_proces_low(str(text))) != []:
-                return(1)
-        else:
-                return(0)
-
-def detect_cabeceras(img):
-
-    '''
-    This function takes an image (img) yand returns 1 if a fax has been detected. Otherwise, it returns 0.
-
-    Some transformations of the input image are performed and text is extracted in order to search key words that
-    may help identifying a fax page.
-    
-    '''
-    # Image Treatment
-    new_h_fax = int(np.round(img.shape[0]*0.07))  
-    im_reduced_fax= img[0:new_h_fax, 0:]
-    new_w_fax = int(np.round(im_reduced_fax.shape[1]*0.7))
-    im_reduced_fax= im_reduced_fax[0:, 0:new_w_fax]
-
-    # Text Treatment
-    text_img_fax = take_text(im_reduced_fax)
-    has_fax = check_key_words(text_img_fax, 'fax')
-
-    return(has_fax)
-
-def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per_new_h_text,per_new_w_text, area_limit_sup):
-
-    '''
-    Function that returns 1 if a shield (from ADMINISTRACION DE JUSTICIA) is detected and 0 otherwise.
+    Function that returns 1 if a shield is detected and 0 otherwise.
     
     '''
     # Flag for shield detection
-    admin  = 0
+    shield  = 0
 
     # Filtering images that are not A4
     # imshape[1] = width, imshape[0] = height
@@ -197,12 +148,6 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per
     im_reduced= img[0:new_h, 0:]
     new_w = int(np.round(im_reduced.shape[1]*per_new_w))  
     im = im_reduced[0:,0:new_w]
-    
-    # pecific reduction to extract text
-    new_h_text = int(np.round(img.shape[0]*per_new_h_text))  
-    im_reduced_text= img[0:new_h_text, 0:]
-    new_w_text = int(np.round(im_reduced_text.shape[1]*per_new_w_text)) 
-    im_text= im_reduced_text[0:, 0:new_w_text]
      
     # BGR to RGB transformation, greyscale  and binary (simplifying pixels over 150 to 255)
     rgb = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
@@ -233,11 +178,9 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per
             keep_not_banners = h>=w 
 
             if keep_width and keep_height and keep_not_banners and keep_area and keep_squared:
-                # Text extraction if image pass the filter
-                text_img = take_text(im_text)
-                admin = check_key_words(text_img,'spain')
+                shield = 1
 
-    return(admin)
+    return(shield)
 
 def detect_shield(img):
 
@@ -245,35 +188,17 @@ def detect_shield(img):
     Function that initialize parameters that will be used when detecting the shield
     '''
 
-    lim_inf_siz_pag =1500
+    lim_inf_siz_pag = 1500
     lim_sup_siz_pag= 2000
     per_new_h = 0.2
     per_new_w = 0.2
-    per_new_h_text = 0.35
-    per_new_w_text = 0.3
     area_limit_sup = 40000
 
-    return(extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w,per_new_h_text,per_new_w_text, area_limit_sup))
+    return(extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w, area_limit_sup))
 
-# PDF splitting
-def build_df(list_pages,sample,name_doc):
-
-    '''
-    This function selects the filtered pages and return a volume version with only this pages and 
-    save it in the output folder.
-
-    The name of the file will be:
-     <sample>_filtered.pdf
-    '''
-    
-    path = './input_pages/pdf_pages_'+sample +'/'
-    pdf = FPDF()
-    for element in list_pages:
-        pdf.add_page()
-        pdf.image(path + element,0,10,210,297)
-    pdf.output('./output/'+ sample + '_' + name_doc + ".pdf", "F")
 
 # Main Functions
+
 def extract_page_info(path_img, obj):
 
     '''
@@ -281,16 +206,13 @@ def extract_page_info(path_img, obj):
     a specific extraction function will be called.
     obj:
     - <emp_page>: empty pages search
-    - <fax_page>: fax search
     - <shield>: shield search
     
     '''
     im_orig = cv2.imread(path_img)
     
     if obj == 'emp_page':
-        return(extract_empty_pages(im_orig.copy()))
-    elif obj == 'fax_page':
-        return(detect_cabeceras(im_orig))
+        return(detect_empty_pages(im_orig.copy()))
     elif obj == 'shield':
         return(detect_shield(im_orig.copy()))
 
@@ -302,18 +224,14 @@ def deal_with_dfs(path,df_volume):
     When the new columns are created they are also filtered in terms of what's needed.
     In this case:
     - Empty pages are discarded
-    - Administration pages are discarded
-    - Fax are discarded
+    - Shield pages are discarded
     '''
 
     df_volume['Empty_Page'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'emp_page'))
     df_volume = df_volume[(df_volume['Empty_Page'] == 0)]
                                                    
-    df_volume['ADMINISTRACION'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'shield'))
-    df_volume = df_volume[df_volume['ADMINISTRACION'] == 0] 
-
-    df_volume['Is_Fax'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'fax_page'))
-    df_volume = df_volume[df_volume['Is_Fax'] == 0]
+    df_volume['SHIELD'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'shield'))
+    df_volume = df_volume[df_volume['SHIELD'] == 0] 
 
     df_volume['Page_Num'] = df_volume['Page_Num'].astype(int)
     df_volume = df_volume.sort_values(by=['Page_Num'])
@@ -334,41 +252,46 @@ def detector_flow(sample):
     
     time0 = time.time()
     create_folder('output')
-    path = build_path(sample, 'input')
+    path = build_strings(sample, 'input')
+
     df_volume = build_df_total(path)
     df_volume = deal_with_dfs(path,df_volume)
 
     list_pages = df_volume['Page_Volume']
     build_df(list_pages,sample,'filtered')
-        
-    print('Filtered Dataframe shape with size {}, time {}'.format(df_volume.shape[0],time.time()-time0))
 
-    df_volume['Page_Volume'].to_csv(build_path(sample, 'output'),sep=';')
+    print('------------------------------------------------------') 
+    print('\U0000270C Filtered Dataframe shape with size {}, time {}'.format(df_volume.shape[0],time.time()-time0))
+    print('------------------------------------------------------')
+
+    df_volume['Page_Volume'].to_csv(build_strings(sample, 'output'))
+
+def initialize_pdf_mode(argv):
+    
+        main_folder = './input_volume/'
+        if os.path.isdir('input_volume') and len(os.listdir(main_folder) ) != 0 and len(os.listdir(main_folder+ argv[1]) ) != 0:
+           return(True)
+        else:
+            print('Please, include the pdf folder inside the directory /input_volume')
+            return(False)
+
+def initialize_img_mode(argv):
+
+        pages_folder = './input_pages/'
+        if os.path.isdir('input_pages') and len(os.listdir(pages_folder) ) != 0 and len(os.listdir(pages_folder+ 'pdf_pages_' + argv[1]) ) != 0:
+            return(True)
+        else:
+            print('Please, include the pages folder inside the directory /input_pages')
+            return(False)
 
 def check_args(argv):
     '''
     Function checking input arguments.
     '''
-    if len(argv) == 3 and argv[2] in ['PDF', 'IMG']:
-        if argv[2] == 'PDF':
-            create_folder('input_pages')
-            main_folder = './input_volume/'
-            if os.path.isdir('input_volume') and len(os.listdir(main_folder) ) != 0 and len(os.listdir(main_folder+ argv[1]) ) != 0:
-                print('\U0001F642 Correct Input Path: {}'.format(main_folder + argv[1] + '/'))
-                return(True)
-            else:
-                print('Please, include the pdf folder inside the directory /input_volume')
-                return(False)
-        elif argv[2] == 'IMG':
-            pages_folder = './input_pages/'
-            if os.path.isdir('input_pages') and len(os.listdir(pages_folder) ) != 0 and len(os.listdir(pages_folder+ 'pdf_pages_' + argv[1]) ) != 0:
-                print('Correct Input Path: {}'.format(pages_folder + argv[1] + '/'))
-                return(True)
-            else:
-                print('Please, include the pages folder inside the directory /input_pages')
-                return(False)
-    else:
+    if len(argv) != 3 or argv[2] not in ['PDF', 'IMG']:
          print('\U0001F4A5 Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
+    else:
+        return(True)
 
 if __name__ == "__main__":
 
@@ -382,8 +305,30 @@ if __name__ == "__main__":
         sample = sys.argv[1]
         mode = sys.argv[2]
 
-        print(sample, mode)
-        if mode == 'PDF':
-            pdf_to_image(sample,poppler_path,'./input_pages/')  
-        detector_flow(sample)
+        if mode == 'PDF'and initialize_pdf_mode(sys.argv):
+            print('Correct Input!')
+            print('------------------------------------------------------')
+            print('\U0001F4AB You are about to process {} volume in mode {}'.format(sample,mode))
+            print('------------------------------------------------------')
+            create_folder('input_pages')
+            pdf_to_image(sample,poppler_path,'./input_pages/')
+
+            detector_flow(sample)
+
+        elif mode == 'IMG' and initialize_img_mode(sys.argv):
+            print('Correct Input!')
+            print('------------------------------------------------------')
+            print('\U0001F4AB You are about to process {} volume in mode {}'.format(sample,mode))
+            print('------------------------------------------------------')
+            
+            detector_flow(sample)
+
+        else:
+            print('\U0001F61E	Processing will not be performed.')
+    else:
+        print('WRONG INPUT')
+        print('\U0001F61E	Processing will not be performed.')
+
+
+
 
