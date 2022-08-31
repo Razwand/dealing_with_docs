@@ -17,8 +17,7 @@ the original pdf file.
 #### Context
 
 - Empty pages
-- Faxes
-- Pages with a certain Shield
+- Pages with shields
 
 #### Dependencies
 
