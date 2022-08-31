@@ -246,7 +246,7 @@ def detector_flow(sample):
     2 - Build needed paths
     3 - Initialized dataframe with all volume pages
     4 - Build columns with extracted features of each one of the pages
-    5 - A new filtered pdf is created (no FAX, no administration shields or empty pages)
+    5 - A new filtered pdf is created (no FAX, shields or empty pages)
     6 - A .csv file is saved with a list of resulting pages after the cleaning filter
     '''
     
