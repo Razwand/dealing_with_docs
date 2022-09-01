@@ -1,33 +1,20 @@
 # About dealing_with_docs
 
-This repo contains 3 tools for large pdf documents treatment:
+This repo contains a tool to perform two actions with a pdf volume of several pages:
 
-- 🧹[Cleaning Volumes](#cleaning-volumes)
+- 🧹[Filtering Volume](#filtering-volume)
 
-- ✂️ 📚 [Split Volumes](#split-volumes)
+- ✂️ 📃📃📃[Volume Fragmentation](#volume-fragmentation)
 
-- ✂️ 📃📃📃[Split Subdocuments](#split-subdocuments)
-
-###  Cleaning Volumes
+###  Filtering Volume
 
 
 This tool can be used to filter a pdf volume with several pages to obtain a reduced version of
-the original pdf file.
+the original pdf file. The user can choose to keep certain pages or discard them based on the following features:
 
-#### Context
-
-- Empty pages
+- Empty pages (always discarded)
 - Pages with shields
 
-#### Dependencies
-
-
-#### Usage
-
-
-
-###  Split Volumes
-
 #### Context
 
 #### Dependencies
@@ -35,9 +22,10 @@ the original pdf file.
 
 #### Usage
 
+###  Volume Fragmentation
 
-
-###  Split Subdocuments
+This tool can be used to split a pdf volume with several pages to obtain subdocuments corresponding to single files originally integrate in the original pdf volume. 
+The difference between subdocuments is detected based on background changes, size changes and shield detection. Empty pages will be discarded.
 
 #### Context
 

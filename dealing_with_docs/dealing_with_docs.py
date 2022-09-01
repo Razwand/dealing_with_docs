@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from split_pdf import *
+from get_ruptures import *
 
 from os import listdir
 from os.path import join, isfile
@@ -11,15 +12,12 @@ import time
 
 import pandas as pd
 import numpy as np
-
-from Levenshtein import distance as lev
-import re
+from collections import Counter
 
 import cv2
 import imutils
 
 from fpdf import FPDF
-import pytesseract
 import warnings
 warnings.simplefilter("ignore")
 
@@ -80,6 +78,25 @@ def build_df(list_pages,sample,name_doc):
         pdf.add_page()
         pdf.image(path + element,0,10,210,297)
     pdf.output('./output/'+ sample + '_' + name_doc + ".pdf", "F")
+
+def alturas_anchuras_docs_tomo(df, path):
+    '''
+    Función que recorre el tomo para determiar lo que se considera
+    una altura/anchura frecuente para una página
+    '''
+    pages = df['Page_Volume']
+    anchuras = []
+    alturas = []
+    for page in pages:
+        im = cv2.imread(path + page)
+    
+        anchuras.append(im.shape[1])
+        alturas.append(im.shape[0])
+        
+    max_alt = most_frequent(alturas)
+    max_anch = most_frequent(anchuras)
+        
+    return(max_alt,max_anch)
 
 ##############################################
 #  FEATURES                                  #
@@ -196,10 +213,72 @@ def detect_shield(img):
 
     return(extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w, area_limit_sup))
 
+# Detect size change
+    
+def extract_size_change(img,  max_width, max_height):
+    '''
+    Función que a partir de una imagen determina si supone un 
+    cambio de tamaño a partir de los valores comunes de
+    altura y anchura presentes en el tomo teniendo en cuenta un margen
+    de diferencia.
+    Este margen es menor en la anchura ya que existen casos en los que por
+    un error de escaneo la altura puede variar sin que sea la altura de la página original
+    diferente a lo que cabe esperar en el tomo.
+    '''
+    anchura = img.shape[1]
+    altura = img.shape[0]
+
+    if altura in range(max_height - 1000, max_height + 1000) and anchura in range(max_width - 50 , max_width + 50):
+        return(0)
+    else:
+        return(1)
+
+# Detect colour change
+def most_frequent(llist):
+    '''
+    Función que toma el elemento más frecuente de la lista
+    '''
+    occurence_count = Counter(llist)
+    return occurence_count.most_common(1)[0][0]
+def count(h,w,img,manual_count):
+    '''
+    Función que recorre la imagen y por cada pixel contea los valores
+    para determinar la presencia de R,G,B
+    '''
+    for y in range(0, h):
+        for x in range(0, w):
+            RGB = (img[x, y, 2], img[x, y, 1], img[x, y, 0])
+            if RGB in manual_count:
+                manual_count[RGB] += 1
+            else:
+                manual_count[RGB] = 1
+    return(manual_count)
+
+def extract_background_color(img):
+    '''
+    Función que devolverá un valor 1 si existe un cambio
+    en el color de fondo de la página (si es distinto de blanco)
+    '''  
+    new_h = int(np.round(img.shape[0]*0.1))  
+    img= img[0:new_h, 0:]
+
+    new_w = int(np.round(img.shape[1]*0.9)) 
+    img = img[0:,new_w:]
+
+    manual_count = {}
+    w, h, channels = img.shape
+    manual_count = count(h,w,img,manual_count)
+    number_counter = Counter(manual_count).most_common(1)
+
+    if number_counter[0][0]!= (255, 255, 255):
+        return(1)
+    else:
+        return(0)
+
 
 # Main Functions
 
-def extract_page_info(path_img, obj):
+def extract_page_info(path_img, obj, max_width=None, max_height=None):
 
     '''
     This function reads an image (path_img) that corresponds to a page and given the search object (obj) 
@@ -215,8 +294,13 @@ def extract_page_info(path_img, obj):
         return(detect_empty_pages(im_orig.copy()))
     elif obj == 'shield':
         return(detect_shield(im_orig.copy()))
+    elif obj == 'back':
+        return(extract_background_color(im_orig.copy()))
+    elif obj == 'size':
+        return(extract_size_change(im_orig.copy(),  max_width, max_height))
 
-def deal_with_dfs(path,df_volume):
+
+def deal_with_dfs(path,df_volume, action, max_height = None,max_width=None):
     
     '''
     This functions starts from the dataframe storing all pages from the volume and stores
@@ -229,16 +313,25 @@ def deal_with_dfs(path,df_volume):
 
     df_volume['Empty_Page'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'emp_page'))
     df_volume = df_volume[(df_volume['Empty_Page'] == 0)]
-                                                   
+                                                
     df_volume['SHIELD'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'shield'))
-    df_volume = df_volume[df_volume['SHIELD'] == 0] 
+
+    if action == 'clean_keep':
+            df_volume = df_volume[df_volume['SHIELD'] == 1] 
+    elif action == 'clean_discard':
+            df_volume = df_volume[df_volume['SHIELD'] == 0] 
+    else:
+        df_volume['BACKGROUND'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'back'))
+        df_volume['SIZE'] = df_volume['Page_Volume'].apply(lambda x: extract_page_info(path + x, 'size', max_height, max_width))
+
 
     df_volume['Page_Num'] = df_volume['Page_Num'].astype(int)
     df_volume = df_volume.sort_values(by=['Page_Num'])
+    
  
     return(df_volume)
 
-def detector_flow(sample):
+def detector_flow(sample, action):
 
     '''
     Main function with the following steps:
@@ -249,22 +342,34 @@ def detector_flow(sample):
     5 - A new filtered pdf is created (no FAX, shields or empty pages)
     6 - A .csv file is saved with a list of resulting pages after the cleaning filter
     '''
-    
+
+
     time0 = time.time()
     create_folder('output')
     path = build_strings(sample, 'input')
-
     df_volume = build_df_total(path)
-    df_volume = deal_with_dfs(path,df_volume)
 
-    list_pages = df_volume['Page_Volume']
-    build_df(list_pages,sample,'filtered')
 
-    print('------------------------------------------------------') 
-    print('\U0000270C Filtered Dataframe shape with size {}, time {}'.format(df_volume.shape[0],time.time()-time0))
-    print('------------------------------------------------------')
+    if action == 'clean_keep' or action == 'clean_discard':
+        df_volume = deal_with_dfs(path,df_volume,action)
+        list_pages = df_volume['Page_Volume']
+        build_df(list_pages,sample,'filtered')
 
-    df_volume['Page_Volume'].to_csv(build_strings(sample, 'output'))
+        print('------------------------------------------------------') 
+        print('\U0000270C Filtered Dataframe shape with size {}, time {}'.format(df_volume.shape[0],time.time()-time0))
+        print('------------------------------------------------------')
+
+        df_volume['Page_Volume'].to_csv(build_strings(sample, 'output'))
+
+    elif action == 'split':
+        max_height,max_width = alturas_anchuras_docs_tomo(df_volume, path)
+        df_volume = deal_with_dfs(path,df_volume, action,max_height,max_width)
+        get_pdfs(sample,df_volume)
+        
+        print('------------------------------------------------------') 
+        print('\U0000270C Subdocuments have been created, time {}'.format(time.time()-time0))
+        print('------------------------------------------------------')
+
 
 def initialize_pdf_mode(argv):
     
@@ -288,7 +393,7 @@ def check_args(argv):
     '''
     Function checking input arguments.
     '''
-    if len(argv) != 3 or argv[2] not in ['PDF', 'IMG']:
+    if len(argv) != 4 or argv[2] not in ['PDF', 'IMG'] or argv[3] not in ['split','clean_keep','clean_discard']:
          print('\U0001F4A5 Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
     else:
         return(True)
@@ -304,6 +409,7 @@ if __name__ == "__main__":
     if check_args(sys.argv):
         sample = sys.argv[1]
         mode = sys.argv[2]
+        action = sys.argv[3]
 
         if mode == 'PDF'and initialize_pdf_mode(sys.argv):
             print('Correct Input!')
@@ -313,7 +419,7 @@ if __name__ == "__main__":
             create_folder('input_pages')
             pdf_to_image(sample,poppler_path,'./input_pages/')
 
-            detector_flow(sample)
+            detector_flow(sample,action)
 
         elif mode == 'IMG' and initialize_img_mode(sys.argv):
             print('Correct Input!')
@@ -321,7 +427,7 @@ if __name__ == "__main__":
             print('\U0001F4AB You are about to process {} volume in mode {}'.format(sample,mode))
             print('------------------------------------------------------')
             
-            detector_flow(sample)
+            detector_flow(sample,action)
 
         else:
             print('\U0001F61E	Processing will not be performed.')
