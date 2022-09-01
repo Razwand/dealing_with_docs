@@ -81,8 +81,7 @@ def build_df(list_pages,sample,name_doc):
 
 def alturas_anchuras_docs_tomo(df, path):
     '''
-    Función que recorre el tomo para determiar lo que se considera
-    una altura/anchura frecuente para una página
+    Function that detects which height/width is common for pages in the volume
     '''
     pages = df['Page_Volume']
     anchuras = []
@@ -217,13 +216,13 @@ def detect_shield(img):
     
 def extract_size_change(img,  max_width, max_height):
     '''
-    Función que a partir de una imagen determina si supone un 
-    cambio de tamaño a partir de los valores comunes de
-    altura y anchura presentes en el tomo teniendo en cuenta un margen
-    de diferencia.
-    Este margen es menor en la anchura ya que existen casos en los que por
-    un error de escaneo la altura puede variar sin que sea la altura de la página original
-    diferente a lo que cabe esperar en el tomo.
+    This function will return 1 if a change in size is detected, 0 otherwise.
+    The common size for pages in the volume is taken from max_width and max_height
+    setting an error margin.
+
+    This margin is greater in terms of height given the nature of scanned documents 
+    (that sometimes have a normal size but the scanning procedure has made the image to be extended vertically)
+
     '''
     anchura = img.shape[1]
     altura = img.shape[0]
@@ -236,14 +235,14 @@ def extract_size_change(img,  max_width, max_height):
 # Detect colour change
 def most_frequent(llist):
     '''
-    Función que toma el elemento más frecuente de la lista
+    Function that takes the most frequent value in the list
     '''
     occurence_count = Counter(llist)
     return occurence_count.most_common(1)[0][0]
 def count(h,w,img,manual_count):
     '''
-    Función que recorre la imagen y por cada pixel contea los valores
-    para determinar la presencia de R,G,B
+    Function that goes through the img and count the presence of R,G,B values
+    per pixel
     '''
     for y in range(0, h):
         for x in range(0, w):
@@ -256,8 +255,7 @@ def count(h,w,img,manual_count):
 
 def extract_background_color(img):
     '''
-    Función que devolverá un valor 1 si existe un cambio
-    en el color de fondo de la página (si es distinto de blanco)
+    This function will return 1 if a change in background is detected, 0 otherwise.
     '''  
     new_h = int(np.round(img.shape[0]*0.1))  
     img= img[0:new_h, 0:]
@@ -372,6 +370,8 @@ def detector_flow(sample, action):
 
 
 def initialize_pdf_mode(argv):
+
+        'This function checks the existence of a given folder and if it contains the data needed (case PDF)'
     
         main_folder = './input_volume/'
         if os.path.isdir('input_volume') and len(os.listdir(main_folder) ) != 0 and len(os.listdir(main_folder+ argv[1]) ) != 0:
@@ -381,6 +381,8 @@ def initialize_pdf_mode(argv):
             return(False)
 
 def initialize_img_mode(argv):
+        'This function checks the existence of a given folder and if it contains the data needed (case IMG)'
+
 
         pages_folder = './input_pages/'
         if os.path.isdir('input_pages') and len(os.listdir(pages_folder) ) != 0 and len(os.listdir(pages_folder+ 'pdf_pages_' + argv[1]) ) != 0:
