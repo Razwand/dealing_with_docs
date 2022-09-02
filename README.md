@@ -32,7 +32,7 @@ pip install -r requirements.txt
 ```
 #### Usage
 
-There are two modes to execute this tool in terms of what is our starting point. The pdf volume must be in a folder inside ./input/ with name <volume_name>
+There are two modes to execute this tool in terms of what is our starting point. The pdf volume must be in a folder inside ./input/ with name <volume_name>.
 
 - PDF: First time executing the volume and pdf to image must be done (in order to obtain single images per volume page)
 ```
