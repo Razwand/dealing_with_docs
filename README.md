@@ -1,4 +1,4 @@
-# About dealing_with_docs
+# 🧽✂️ Dealing with Docs with OpenCV 🖼️🛡️
 
 This repo contains a tool to perform two actions with a pdf volume of several pages:
 
