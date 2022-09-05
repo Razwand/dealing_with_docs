@@ -13,7 +13,7 @@ This repo contains a tool to perform two actions with a pdf volume of several pa
 
 - ✂️ 📃📃📃 Volume Fragmentation
 
-    This tool can be used to split a pdf volume with several pages to obtain subdocuments corresponding to single files originally integrate in the original pdf volume. 
+    This tool can be used to split a pdf volume with several pages to obtain subdocuments corresponding to single files originally integrated in the big pdf volume. 
     The difference between subdocuments is detected based on background changes, size changes and shield detection. Empty pages will be always discarded.
 
 ## Context
@@ -21,7 +21,7 @@ This repo contains a tool to perform two actions with a pdf volume of several pa
 This tool was conceived to process scanned documents. More in particular, the shield detection comes from the fact that the documents were official
 administration volumes.
 
-The idea is to reduce size of this huge volumes containing subdocuments (action clean) or splitting in different pdf files contained in the complete volume pdf for further processing.
+The idea is to reduce size of this huge volumes containing subdocuments (action clean) or splitting in different pdf files contained in the complete volume pdf for further processing (action split).
 
 ## Dependencies
 - poppler is included within the project as its path must be specified to be able to execute the code. 
