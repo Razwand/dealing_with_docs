@@ -18,6 +18,13 @@ This repo contains a tool to perform two actions with a pdf volume of several pa
     
 ![Flow](https://github.com/Razwand/dealing_with_docs/blob/main/dealing_with_docs/images/flow.PNG)
 
+## Requirements
+- A suitable conda environment named dealing_with_docs can be created and activated with:
+
+```console
+conda env create -f environment_deal_docs.yml
+conda activate scrap
+```
 
 ## Context
 
@@ -26,13 +33,6 @@ administration volumes.
 
 The idea is to reduce size of this huge volumes containing subdocuments (action clean) or splitting in different pdf files contained in the complete volume pdf for further processing (action split).
 
-## Dependencies
-- poppler is included within the project as its path must be specified to be able to execute the code. 
-- required libraries in requierements.txt
-
-```console
-pip install -r requirements.txt
-```
 ## How to
 
 There are two modes to execute this tool in terms of what is our starting point. The pdf volume must be in a folder inside ./input/ with name <volume_name>.
