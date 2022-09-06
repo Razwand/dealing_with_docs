@@ -23,7 +23,7 @@ This repo contains a tool to perform two actions with a pdf volume of several pa
 
 ```console
 conda env create -f environment_deal_docs.yml
-conda activate scrap
+conda activate dealing_with_docs
 ```
 
 ## Context
