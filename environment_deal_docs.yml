@@ -47,9 +47,6 @@ dependencies:
     - fpdf==1.7.2
     - imutils==0.5.4
     - jarowinkler==1.2.1
-    - levenshtein==0.20.2
     - pdf2image==1.16.0
     - pillow==9.2.0
-    - pytesseract==0.3.10
     - rapidfuzz==2.6.0
-
