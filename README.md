@@ -25,6 +25,12 @@ This repo contains a tool to perform two actions with a pdf volume of several pa
 conda env create -f environment_deal_docs.yml
 conda activate dealing_with_docs
 ```
+Poppler must be installed and the instalation path should be specified in the code:
+
+```python
+poppler_path = './libs/poppler-0.68.0/bin'
+```
+👉[More about Poppler and how to install it](https://poppler.freedesktop.org/)
 
 ## Context
 
