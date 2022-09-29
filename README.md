@@ -23,9 +23,11 @@ This repo contains a tool to perform different transformations of a pdf volume o
 
 ```console
 conda env create -f environment_deal_docs.yml
+```
+```console
 conda activate dealing_with_docs
 ```
-Poppler must be installed and the instalation path should be specified in the code:
+Poppler must be installed and placed in the ./libs/ folder:
 
 ```python
 poppler_path = './libs/poppler-0.68.0/bin'
