@@ -1,6 +1,6 @@
 # 🧽✂️ Dealing with Docs with OpenCV 🖼️🛡️
 
-This repo contains a tool to perform different transformations with a pdf volume of several pages:
+This repo contains a tool to perform different transformations of a pdf volume of several pages:
 
 - 🧹 Filtering Volume
 
