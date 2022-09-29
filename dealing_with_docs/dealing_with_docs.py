@@ -26,7 +26,7 @@ warnings.simplefilter("ignore")
 #  GENERAL TOOLS                             #
 ##############################################
 
-def build_strings(sample, type_string):
+def build_strings(sample, type_string,action):
     '''
     This function generates a  string needed (input path/output file).
     - sample: string that contains the volume directory name 
@@ -35,7 +35,7 @@ def build_strings(sample, type_string):
     if type_string == 'input':
         return('./input_pages/pdf_pages_' + sample + '/')
     elif type_string == 'output':
-        return('./output/Final_Result_'+sample+'.csv')
+        return('./output/Final_Result_'+sample+'_'+action+'.csv')
 
 def build_df_total(path):
 
@@ -344,7 +344,7 @@ def detector_flow(sample, action):
 
     time0 = time.time()
     create_folder('output')
-    path = build_strings(sample, 'input')
+    path = build_strings(sample, 'input',action)
     df_volume = build_df_total(path)
 
 
@@ -357,7 +357,7 @@ def detector_flow(sample, action):
         print('\U0000270C Filtered Dataframe shape with size {}, time {}'.format(df_volume.shape[0],time.time()-time0))
         print('------------------------------------------------------')
 
-        df_volume['Page_Volume'].to_csv(build_strings(sample, 'output'))
+        df_volume['Page_Volume'].to_csv(build_strings(sample, 'output',action))
 
     elif action == 'split':
         max_height,max_width = alturas_anchuras_docs_tomo(df_volume, path)
