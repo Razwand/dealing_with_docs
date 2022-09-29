@@ -27,11 +27,12 @@ conda env create -f environment_deal_docs.yml
 ```console
 conda activate dealing_with_docs
 ```
-Poppler must be installed and placed in the ./libs/ folder:
+Poppler must be installed and placed a ./libs/ folder:
 
 ```python
 poppler_path = './libs/poppler-0.68.0/bin'
 ```
+⚠️ Note that other versions of poppler have not been tested.
 👉[More about Poppler and how to install it](https://poppler.freedesktop.org/)
 
 ## Context
