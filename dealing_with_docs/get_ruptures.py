@@ -62,6 +62,7 @@ def build_rupture_column(df):
     se consideran los escudos detectados en función de si el texto extraído de éstos
     es el esperado.
     '''        
+   
     # Filtrado Vacíos, Faxes, Informes
     df =  df[(df['Empty_Page']==0)]
         
@@ -71,12 +72,13 @@ def build_rupture_column(df):
     df_rupture_esc_esp = get_rupture(df, 'SHIELD', 'CHANGE_SHIELD', 'RUPTURE_SHIELD')[['Page_Num','RUPTURE_SHIELD']]    
     df_rupture_size = get_rupture(df, 'SIZE', 'CHANGE_SIZE', 'RUPTURE_SIZE')[['Page_Num','RUPTURE_SIZE']]
     df_rupture_background = get_rupture(df, 'BACKGROUND', 'CHANGE_BACK', 'RUPTURE_BACK')[['Page_Num','RUPTURE_BACK']]
-    
+
     df_final = df_rupture_size.merge(df_rupture_background,how ='left').merge(df_rupture_esc_esp,how ='left')
-    
+
     df_final = df_final.set_index('Page_Num')
     df_final['Document'] = 1
-    df_final['Document'][(df_final['RUPTURE_SIZE'] == 0) & (df_final['RUPTURE_BACK'] == 0)  &  (df_final['RUPTURE_SHIELD'] == 0)]
+    df_final['Document'][(df_final['RUPTURE_SIZE'] == 0) & (df_final['RUPTURE_BACK'] == 0)  &  (df_final['RUPTURE_SHIELD'] == 0)] = 0
+
     
     return(df_final)
 
@@ -88,6 +90,7 @@ def build_df(great_list,df_names,sample):
     los subdocumentos extraídos de la ruptura
     
     '''
+
     path = './input_pages/pdf_pages_'+sample
     doc = 0
     create_folder('output')
@@ -108,6 +111,7 @@ def get_pdfs(sample,df):
     por página del tomo (df) y genera pdfs de subdocumentos según las rupturas marcadas.
     '''
     df =  build_rupture_column(df) 
+
     great_list = []
     list_sub_doc = []
     for ele in df.index:

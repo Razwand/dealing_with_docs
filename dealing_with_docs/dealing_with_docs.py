@@ -396,7 +396,7 @@ def check_args(argv):
     Function checking input arguments.
     '''
     if len(argv) != 4 or argv[2] not in ['PDF', 'IMG'] or argv[3] not in ['split','clean_keep','clean_discard']:
-         print('\U0001F4A5 Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
+         print('\U00002639  Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
     else:
         return(True)
 
@@ -416,7 +416,7 @@ if __name__ == "__main__":
         if mode == 'PDF'and initialize_pdf_mode(sys.argv):
             print('Correct Input!')
             print('------------------------------------------------------')
-            print('\U0001F4AB You are about to process {} volume in mode {}'.format(sample,mode))
+            print('\U0001F642 You are about to process {} volume in mode {}'.format(sample,mode))
             print('------------------------------------------------------')
             create_folder('input_pages')
             pdf_to_image(sample,poppler_path,'./input_pages/')
@@ -426,16 +426,16 @@ if __name__ == "__main__":
         elif mode == 'IMG' and initialize_img_mode(sys.argv):
             print('Correct Input!')
             print('------------------------------------------------------')
-            print('\U0001F4AB You are about to process {} volume in mode {}'.format(sample,mode))
+            print('\U0001F642 You are about to process {} volume in mode {}'.format(sample,mode))
             print('------------------------------------------------------')
             
             detector_flow(sample,action)
 
         else:
-            print('\U0001F61E	Processing will not be performed.')
+            print('\U00002639	Processing will not be performed.')
     else:
         print('WRONG INPUT')
-        print('\U0001F61E	Processing will not be performed.')
+        print('\U00002639	Processing will not be performed.')
 
 
 
