@@ -40,7 +40,7 @@ poppler_path = './libs/poppler-0.68.0/bin'
 This tool was conceived to process scanned documents. More in particular, the shield detection comes from the fact that the documents were official
 administration volumes.
 
-The idea is to reduce size of this huge volumes containing subdocuments (action clean) or splitting in different pdf files contained in the complete volume pdf for further processing (action split).
+The idea is to reduce the size of these huge volumes containing subdocuments (action clean) or splitting into different pdf files contained in the complete volume pdf for further processing (action split).
 
 ## How to
 
