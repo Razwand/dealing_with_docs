@@ -1,6 +1,6 @@
 # 🧽✂️ Dealing with Docs with OpenCV 🖼️🛡️
 
-This repo contains a tool to perform two actions with a pdf volume of several pages:
+This repo contains a tool to perform different transformations with a pdf volume of several pages:
 
 - 🧹 Filtering Volume
 
@@ -41,15 +41,15 @@ The idea is to reduce size of this huge volumes containing subdocuments (action 
 
 ## How to
 
-There are two modes to execute this tool in terms of what is our starting point. The pdf volume must be in a folder inside ./input/ with name <volume_name>.
+There are two modes to execute this tool in terms of what is our starting point. The pdf volume must be in a folder inside ./input_volume/ with name <volume_name>.
 
 - PDF: First time executing the volume and pdf to image must be done (in order to obtain single images per volume page)
 ```
-dealing_with_docs>python dealing_with_docs.py <volume_name> *PDF* <action>
+dealing_with_docs>python dealing_with_docs.py <volume_name> PDF <action>
 ```
 - IMG: When pdf to image has already be done and this step can be skipped
 ```
-dealing_with_docs>python dealing_with_docs.py <volume_name> *IMG* <action>
+dealing_with_docs>python dealing_with_docs.py <volume_name> IMG <action>
 ```
 
 Also, the two tools contained in this scripts are activated with the <action> argument:
