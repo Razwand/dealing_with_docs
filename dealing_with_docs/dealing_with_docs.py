@@ -40,13 +40,13 @@ def build_strings(sample, type_string):
 def build_df_total(path):
 
     '''
-    This functions builds a table with all the features that will be extracted.
+    These functions builds a table with all the features that will be extracted.
     Two columns will be created:
 
     - ID identifying each one of the volume pages
     - Numeric column in order to be able to order them based on the page number.
 
-    The file name storing each page will have the following structure:
+    The file name where each page will be stored have the following structure:
     
     <name_of_pdf_volume>.pdf_page_<page_number>.jpg.
     '''
@@ -65,8 +65,8 @@ def build_df_total(path):
 def build_df(list_pages,sample,name_doc):
 
     '''
-    This function selects the filtered pages and return a volume version with only this pages and 
-    save it in the output folder.
+    This function selects the filtered pages and returns a volume version with only these pages and 
+    saves it in the output folder.
 
     The name of the file will be:
      <sample>_filtered.pdf
@@ -81,7 +81,7 @@ def build_df(list_pages,sample,name_doc):
 
 def alturas_anchuras_docs_tomo(df, path):
     '''
-    Function that detects which height/width is common for pages in the volume
+    A function that detects which height/width is common for pages in the volume
     '''
     pages = df['Page_Volume']
     anchuras = []
@@ -137,7 +137,7 @@ def extract_empty_pages(img,contour_limit):
 def detect_empty_pages(img):
 
     '''
-    Function that initialize parameters that will be used when detecting the shield
+    Function that initiates parameters that will be used when detecting the shield
     '''
 
     contour_limit = 100
@@ -201,7 +201,7 @@ def extract_shield(img,lim_inf_siz_pag, lim_sup_siz_pag, per_new_h,per_new_w, ar
 def detect_shield(img):
 
     '''
-    Function that initialize parameters that will be used when detecting the shield
+    Function that initiates parameters that will be used when detecting the shield
     '''
 
     lim_inf_siz_pag = 1500
@@ -235,13 +235,13 @@ def extract_size_change(img,  max_width, max_height):
 # Detect colour change
 def most_frequent(llist):
     '''
-    Function that takes the most frequent value in the list
+    A function that takes the most frequent value in the list
     '''
     occurence_count = Counter(llist)
     return occurence_count.most_common(1)[0][0]
 def count(h,w,img,manual_count):
     '''
-    Function that goes through the img and count the presence of R,G,B values
+    A function that goes through the img and counts the presence of R,G,B values
     per pixel
     '''
     for y in range(0, h):
@@ -301,7 +301,7 @@ def extract_page_info(path_img, obj, max_width=None, max_height=None):
 def deal_with_dfs(path,df_volume, action, max_height = None,max_width=None):
     
     '''
-    This functions starts from the dataframe storing all pages from the volume and stores
+    This function starts with the dataframe storing all pages from the volume and stores
     each of the features detected.
     When the new columns are created they are also filtered in terms of what's needed.
     In this case:
@@ -396,7 +396,7 @@ def check_args(argv):
     Function checking input arguments.
     '''
     if len(argv) != 4 or argv[2] not in ['PDF', 'IMG'] or argv[3] not in ['split','clean_keep','clean_discard']:
-         print('\U0001F914  Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG)')     
+         print('\U0001F914  Incorrect number of arguments. Arguments should be: name of the directory to be treated and execution mode (PDF or IMG) and action')     
     else:
         return(True)
 

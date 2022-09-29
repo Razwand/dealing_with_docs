@@ -11,7 +11,7 @@ from fpdf import FPDF
 
 def get_rupture(df, col, name_col_changes, name_col_rupture):
     '''
-    Esta función realiza una transformación de la tabla original de forma
+    A function that takes the original dataframe and transforms it with the following structure
     ---------------------
     COLUMN_1
     ---------------------
@@ -21,10 +21,9 @@ def get_rupture(df, col, name_col_changes, name_col_rupture):
     0
     0
 
-    Donde cada uno marca la aparación de la característica tratada en dicha columna.
+    Where each 1 represents the feature treated in that particular column.
 
-    Se pasa a transformar una tabla que marca cambios de 1 a 0 o de 0 a 1 en la secuencia
-    que marca la columna. Así la columna reflejada arriba como ejemplo quedaría:
+    Changes within the document are marked for each feature:
 
     ---------------------
     COLUMN_1_CHANGES
@@ -50,17 +49,15 @@ def get_rupture(df, col, name_col_changes, name_col_rupture):
  
 def create_folder(name):
     '''
-    Crea una carpeta con el nombre <name> si no existe ya
+    A function that creates a folder with name <name> 
     '''  
     if os.path.isdir(name) == False:
         os.mkdir(name)
 
 def build_rupture_column(df): 
     '''
-    Se crea la columna de ruptura en base a la tabla obtenida de 
-    características marcadas (df), se filtran fax/informes y páginas vacías y
-    se consideran los escudos detectados en función de si el texto extraído de éstos
-    es el esperado.
+    A new rupture column is created with the dataframe of marked features (df), 
+    and pages are filtered.
     '''        
    
     # Filtrado Vacíos, Faxes, Informes
@@ -85,9 +82,7 @@ def build_rupture_column(df):
 def build_df(great_list,df_names,sample):
 
     '''
-    Esta función agrupa las páginas donde no hay cambios
-    según la columna genérica de ruptura en pdfs que representarán
-    los subdocumentos extraídos de la ruptura
+    Groups pages with no changes depending on the general rupture column.
     
     '''
 
@@ -107,8 +102,8 @@ def build_df(great_list,df_names,sample):
 def get_pdfs(sample,df):
 
     '''
-    Función general encargada de tomar la tabla que marca las características
-    por página del tomo (df) y genera pdfs de subdocumentos según las rupturas marcadas.
+    General function that takes original dataframe, and group subdocuments and generates 
+    single pdfs for each subdocuments.
     '''
     df =  build_rupture_column(df) 
 

@@ -17,12 +17,12 @@ def create_folder(name):
 def pdf_to_image(input_folder_name,poppler_path, output_folder_path):
 
     '''
-    This fuction takes a pdf and, given de input folder name,
-    generate images for each one of the pdf pages.
+    This function takes a pdf and, given the input folder name,
+    generates images for each one of the pdf pages.
     
     pdf_pages_<input_folder_name>
     
-    The name of the images created will have the following structure:
+    The names of the images created will have the following structure:
 
     <name_of_the_volume>.pdf_page_<page_number>.jpg
     '''
